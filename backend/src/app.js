@@ -1,4 +1,7 @@
 const express = require("express");
+const authRoute = require("./routes/authRoute");
+const userRoute = require("./routes/userRoute");
+
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -18,7 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cookieParser());
 
-app.use("/public", express.static("src/uploads"));
+app.use("/uploads", express.static("uploads"));
+
+app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
 
 app.get("/", (req, res) => {
   res.json({
