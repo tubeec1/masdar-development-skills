@@ -1,6 +1,7 @@
 const express = require("express");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
+const courseRoute = require("./routes/courseRoute");
 
 const cors = require("cors");
 const helmet = require("helmet");
@@ -25,6 +26,7 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
+app.use("/api/courses", courseRoute);
 
 app.get("/", (req, res) => {
   res.json({
