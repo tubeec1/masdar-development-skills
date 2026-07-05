@@ -2,6 +2,9 @@ const express = require("express");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const courseRoute = require("./routes/courseRoute");
+const moduleRoute = require("./routes/moduleRoute");
+const lessonRoute = require("./routes/lessonRoute");
+const categoryRoute = require("./routes/categoryRoute");
 
 const cors = require("cors");
 const helmet = require("helmet");
@@ -27,6 +30,9 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/courses", courseRoute);
+app.use("/api/modules", moduleRoute);
+app.use("/api/lessons", lessonRoute);
+app.use("/api/categories", categoryRoute);
 
 app.get("/", (req, res) => {
   res.json({

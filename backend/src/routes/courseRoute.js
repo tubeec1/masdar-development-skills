@@ -25,9 +25,6 @@ const router = express.Router();
 // Read Published Courses
 router.get("/", CourseController.readPublishedCourses);
 
-// Read Course By Slug
-router.get("/:slug", CourseController.readCourseBySlug);
-
 /*
 |--------------------------------------------------------------------------
 | Teacher Routes
@@ -86,7 +83,15 @@ router.get(
   CourseController.readCourses,
 );
 
-// Change Status
+// Dashboard Counts
+router.get(
+  "/dashboard-counts",
+  authenticateToken,
+  authorizeRoles("admin"),
+  CourseController.dashboardCounts,
+);
+
+// Change Course Status
 router.patch(
   "/status/:id",
   authenticateToken,
@@ -96,12 +101,14 @@ router.patch(
   CourseController.changeCourseStatus,
 );
 
-// Dashboard Counts
-router.get(
-  "/dashboard-counts",
-  authenticateToken,
-  authorizeRoles("admin"),
-  CourseController.dashboardCounts,
-);
+/*
+|--------------------------------------------------------------------------
+| Public Single Course
+|--------------------------------------------------------------------------
+*/
+
+// Read Course By Slug
+// IMPORTANT: Keep this LAST because :slug matches any string.
+router.get("/:slug", CourseController.readCourseBySlug);
 
 module.exports = router;
