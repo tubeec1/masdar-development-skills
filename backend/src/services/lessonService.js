@@ -1,5 +1,6 @@
 const LessonModel = require("../models/lessonModel");
 const ModuleModel = require("../models/moduleModel");
+const EnrollmentModel = require("../models/enrollmentModel");
 
 class LessonService {
   /*
@@ -97,6 +98,107 @@ class LessonService {
       message: "Lessons fetched successfully.",
       total: lessons.length,
       lessons,
+    };
+  }
+
+  /*
+|--------------------------------------------------------------------------
+| Read Lesson For Learning
+|--------------------------------------------------------------------------
+*/
+
+  static async readLesson(user, lessonId) {
+    const lesson = await LessonModel.findLessonForLearning(lessonId);
+
+    if (!lesson) {
+      return {
+        statusCode: 404,
+        success: false,
+        message: "Lesson not found.",
+      };
+    }
+
+    /*
+  |--------------------------------------------------------------------------
+  | Admin
+  |--------------------------------------------------------------------------
+  */
+
+    if (user.role === "admin") {
+      return {
+        statusCode: 200,
+        success: true,
+        message: "Lesson fetched successfully.",
+        lesson,
+      };
+    }
+
+    /*
+  |--------------------------------------------------------------------------
+  | Teacher
+  |--------------------------------------------------------------------------
+  */
+
+    if (
+      user.role === "teacher" &&
+      Number(lesson.teacherId) === Number(user.id)
+    ) {
+      return {
+        statusCode: 200,
+        success: true,
+        message: "Lesson fetched successfully.",
+        lesson,
+      };
+    }
+
+    /*
+  |--------------------------------------------------------------------------
+  | Student
+  |--------------------------------------------------------------------------
+  */
+
+    if (user.role === "student") {
+      const finalPrice =
+        Number(lesson.discountPrice) > 0
+          ? Number(lesson.discountPrice)
+          : Number(lesson.price);
+
+      // Free Course
+      if (finalPrice <= 0) {
+        return {
+          statusCode: 200,
+          success: true,
+          message: "Lesson fetched successfully.",
+          lesson,
+        };
+      }
+
+      // Paid Course → Approved Enrollment Required
+      const enrollment = await EnrollmentModel.findStudentEnrollment(
+        user.id,
+        lesson.courseId,
+      );
+
+      if (enrollment && enrollment.status === "Approved") {
+        return {
+          statusCode: 200,
+          success: true,
+          message: "Lesson fetched successfully.",
+          lesson,
+        };
+      }
+
+      return {
+        statusCode: 403,
+        success: false,
+        message: "You must purchase this course before accessing its lessons.",
+      };
+    }
+
+    return {
+      statusCode: 403,
+      success: false,
+      message: "Access denied.",
     };
   }
   /*

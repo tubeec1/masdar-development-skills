@@ -64,19 +64,67 @@ class LessonModel {
   // ==============================
   // Read Lessons By Module
   // ==============================
+  // ==============================
+  // Read Lessons By Module
+  // ==============================
   static async findByModule(moduleId) {
     const [rows] = await db.execute(
       `
-      SELECT
-        *
-      FROM lessons
-      WHERE moduleId = ?
-      ORDER BY lessonOrder ASC
-      `,
+    SELECT
+      id,
+      moduleId,
+      title,
+      duration,
+      lessonOrder,
+      isPreview,
+      createdAt,
+      updatedAt
+
+    FROM lessons
+
+    WHERE moduleId = ?
+
+    ORDER BY lessonOrder ASC
+    `,
       [moduleId],
     );
 
     return rows;
+  }
+
+  // ==============================
+  // Find Lesson For Learning
+  // ==============================
+  static async findLessonForLearning(id) {
+    const [rows] = await db.execute(
+      `
+    SELECT
+      l.*,
+
+      cm.courseId,
+      cm.title AS moduleTitle,
+
+      c.teacherId,
+      c.title AS courseTitle,
+      c.price,
+      c.discountPrice
+
+    FROM lessons l
+
+    INNER JOIN course_modules cm
+      ON l.moduleId = cm.id
+
+    INNER JOIN courses c
+      ON cm.courseId = c.id
+
+    WHERE l.id = ?
+
+    LIMIT 1
+    `,
+      [id],
+    );
+
+    return rows[0] || null;
   }
 
   // ==============================

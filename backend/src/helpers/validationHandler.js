@@ -9,7 +9,7 @@ const validationHandler = (req, res, next) => {
 
   return res.status(422).json({
     success: false,
-    message: "Validation failed",
+    message: errors.array()[0].msg,
     errors: errors.array().map((error) => ({
       field: error.path,
       message: error.msg,

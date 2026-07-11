@@ -36,6 +36,24 @@ class LessonController {
   }
 
   /*
+|--------------------------------------------------------------------------
+| Read Lesson For Learning
+|--------------------------------------------------------------------------
+*/
+
+  static async readLesson(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const result = await LessonService.readLesson(req.user, id);
+
+      return res.status(result.statusCode).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /*
   |--------------------------------------------------------------------------
   | Update Lesson
   |--------------------------------------------------------------------------

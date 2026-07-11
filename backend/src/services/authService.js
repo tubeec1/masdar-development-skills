@@ -13,7 +13,7 @@ class AuthService {
   static async register(data) {
     const { fullName, email, password, phone, gender, nationality, country } =
       data;
-
+    console.log("Register Data:", data); // Log the incoming data
     // Check existing email
     const existingUser = await UserModel.findByEmail(email);
 

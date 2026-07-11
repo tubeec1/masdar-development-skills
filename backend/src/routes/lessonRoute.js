@@ -21,7 +21,21 @@ const router = express.Router();
 */
 
 // Read Lessons By Module
+// Read Lessons By Module
 router.get("/module/:moduleId", LessonController.readModuleLessons);
+
+/*
+|--------------------------------------------------------------------------
+| Read Lesson For Learning
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/read/:id",
+  authenticateToken,
+  authorizeRoles("student", "teacher", "admin"),
+  LessonController.readLesson,
+);
 
 /*
 |--------------------------------------------------------------------------

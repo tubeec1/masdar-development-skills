@@ -120,15 +120,23 @@ class UserService {
       profileImage = `uploads/profileImages/${file.filename}`;
     }
 
+    let password = "";
+
+    if (body.password) {
+      password = await bcrypt.hash(body.password, 10);
+    } else {
+      password = user.password;
+    }
+
     await UserModel.updateUser(userId, {
-      fullName: body.fullName ?? user.fullName,
-      phone: body.phone ?? user.phone,
-      password: (await bcrypt.hash(body.password, 10)) ?? user.password,
-      gender: body.gender ?? user.gender,
-      nationality: body.nationality ?? user.nationality,
-      country: body.country ?? user.country,
-      role: body.role ?? user.role,
-      bio: body.bio ?? user.bio,
+      fullName: body.fullName || user.fullName,
+      phone: body.phone || user.phone,
+      password: password,
+      gender: body.gender || user.gender,
+      nationality: body.nationality || user.nationality,
+      country: body.country || user.country,
+      role: body.role || user.role,
+      bio: body.bio || user.bio,
       profileImage,
     });
 
