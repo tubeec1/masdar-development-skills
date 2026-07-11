@@ -78,8 +78,8 @@ const CONTACT_ITEMS = [
   {
     icon: MdPhone,
     label: "Phone",
-    lines: ["+252 XXXXXXXX"],
-    href: "tel:+252XXXXXXXX",
+    lines: ["+252 619496706"],
+    href: "tel:+252619496706",
   },
   {
     icon: MdEmail,

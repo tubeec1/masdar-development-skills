@@ -193,15 +193,18 @@ const moduleSlice = createSlice({
         state.message = null;
       })
 
+      // In moduleSlice.js
       .addCase(createModule.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
 
-        if (action.payload.module) {
-          state.modules.unshift(action.payload.module);
-          state.courseModules.push(action.payload.module);
-          state.currentModule = action.payload.module;
+        // More flexible lookup
+        const newModule = action.payload.module || action.payload;
+
+        if (newModule) {
+          state.courseModules = [...state.courseModules, newModule]; // Forces a new array reference
+          state.currentModule = newModule;
         }
       })
 

@@ -5,13 +5,19 @@ import {
   createCourse,
   updateCourse,
   deleteCourse,
-  resetCourseState,
 } from "../../../features/course/courseSlice";
 import { getActiveCategories } from "../../../features/category/categorySlice";
+import {
+  HiOutlinePlus,
+  HiOutlinePencil,
+  HiOutlineTrash,
+  HiOutlineX,
+  HiOutlineCamera,
+} from "react-icons/hi";
 
 const MyCourses = () => {
   const dispatch = useDispatch();
-  const { teacherCourses, loading } = useSelector((state) => state.course);
+  const { teacherCourses } = useSelector((state) => state.course);
   const { activeCategories } = useSelector((state) => state.category);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +32,6 @@ const MyCourses = () => {
     level: "Beginner",
     price: "",
     discountPrice: "",
-
     thumbnail: null,
   });
 
@@ -47,27 +52,43 @@ const MyCourses = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) data.append(key, formData[key]);
-    });
+
+    // Explicitly appending fields to ensure backend compatibility
+    data.append("categoryId", formData.categoryId);
+    data.append("title", formData.title);
+    data.append("description", formData.description);
+    data.append("introVideo", formData.introVideo);
+    data.append("duration", formData.duration);
+    data.append("language", formData.language);
+    data.append("level", formData.level);
+    data.append("price", formData.price);
+    data.append("discountPrice", formData.discountPrice);
+
+    if (formData.thumbnail) {
+      data.append("thumbnail", formData.thumbnail);
+    }
 
     if (editingCourse) {
-      dispatch(updateCourse({ id: editingCourse.id, courseData: data }));
+      await dispatch(
+        updateCourse({ id: editingCourse.id, courseData: data }),
+      ).unwrap();
     } else {
-      dispatch(createCourse(data));
+      await dispatch(createCourse(data)).unwrap();
     }
+    dispatch(getTeacherCourses());
     closeModal();
   };
 
   const openEditModal = (course) => {
     setEditingCourse(course);
-    setFormData({ ...course, thumbnail: null }); // Don't pre-fill file
+    setFormData({ ...course, thumbnail: null });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this course?")) {
-      dispatch(deleteCourse(id));
+      await dispatch(deleteCourse(id)).unwrap();
+      dispatch(getTeacherCourses());
     }
   };
 
@@ -84,68 +105,67 @@ const MyCourses = () => {
       level: "Beginner",
       price: "",
       discountPrice: "",
-      status: "Draft",
       thumbnail: null,
     });
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+    <div className="h-[100vh] bg-white p-6 flex flex-col overflow-y-auto">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">My Courses</h1>
-          <p className="text-gray-500">
-            Manage your published and draft courses
+          <h1 className="text-xl font-extrabold text-slate-900">My Courses</h1>
+          <p className="text-xs text-slate-400 font-medium">
+            Manage your published and draft courses.
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition"
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
         >
-          + Create Course
+          <HiOutlinePlus /> Create New Course
         </button>
       </div>
 
-      {/* Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-100 border-b">
-            <tr>
+      <div className="flex-1 border border-slate-100 rounded-2xl bg-white shadow-sm overflow-hidden">
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr className="bg-slate-50 border-b text-slate-400 uppercase font-bold text-[10px]">
               <th className="p-4">Title</th>
               <th className="p-4">Category</th>
               <th className="p-4">Level</th>
               <th className="p-4">Price</th>
               <th className="p-4">Status</th>
-              <th className="p-4 text-center">Actions</th>
+              <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-slate-50">
             {teacherCourses?.map((course) => (
-              <tr key={course.id} className="border-b hover:bg-gray-50">
-                <td className="p-4 font-medium">{course.title}</td>
-                <td className="p-4 text-gray-600">{course.categoryName}</td>
-                <td className="p-4 text-gray-600">{course.level}</td>
-                <td className="p-4 text-gray-600">${course.price}</td>
+              <tr key={course.id} className="hover:bg-slate-50/50">
+                <td className="p-4 font-bold text-slate-900">{course.title}</td>
+                <td className="p-4 text-slate-600">{course.categoryName}</td>
+                <td className="p-4 text-slate-600">{course.level}</td>
+                <td className="p-4 font-bold text-slate-900">
+                  ${course.price}
+                </td>
                 <td className="p-4">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs ${course.status === "Published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                    className={`px-2 py-0.5 rounded-full font-bold text-[9px] ${course.status === "Published" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}
                   >
                     {course.status}
                   </span>
                 </td>
-                <td className="p-4 text-center">
+                <td className="p-4 text-right">
                   <button
                     onClick={() => openEditModal(course)}
-                    className="text-blue-600 hover:underline mr-4"
+                    className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg mr-2"
                   >
-                    Edit
+                    <HiOutlinePencil />
                   </button>
                   <button
                     onClick={() => handleDelete(course.id)}
-                    className="text-red-600 hover:underline"
+                    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg"
                   >
-                    Delete
+                    <HiOutlineTrash />
                   </button>
                 </td>
               </tr>
@@ -154,115 +174,120 @@ const MyCourses = () => {
         </table>
       </div>
 
-      {/* Modal Form */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <form
             onSubmit={handleSubmit}
-            className="bg-white p-8 rounded-xl w-full max-w-2xl grid grid-cols-2 gap-4 max-h-[90vh] overflow-y-auto"
+            className="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
           >
-            <h2 className="col-span-2 text-2xl font-bold">
-              {editingCourse ? "Edit Course" : "Create New Course"}
-            </h2>
-
-            <select
-              name="categoryId"
-              onChange={handleInputChange}
-              value={formData.categoryId}
-              className="border p-2 rounded"
-            >
-              <option value="">Select Category</option>
-              {activeCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.title}
-                </option>
-              ))}
-            </select>
-            <input
-              name="title"
-              placeholder="Title"
-              onChange={handleInputChange}
-              value={formData.title}
-              className="border p-2 rounded"
-            />
-            <input
-              name="price"
-              type="number"
-              placeholder="Price"
-              onChange={handleInputChange}
-              value={formData.price}
-              className="border p-2 rounded"
-            />
-            <input
-              name="discountPrice"
-              type="number"
-              placeholder="Discount"
-              onChange={handleInputChange}
-              value={formData.discountPrice}
-              className="border p-2 rounded"
-            />
-
-            <select
-              name="language"
-              onChange={handleInputChange}
-              value={formData.language}
-              className="border p-2 rounded"
-            >
-              <option>English</option>
-              <option>Somali</option>
-            </select>
-            <select
-              name="level"
-              onChange={handleInputChange}
-              value={formData.level}
-              className="border p-2 rounded"
-            >
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
-            </select>
-
-            <input
-              name="duration"
-              placeholder="Duration (e.g. 10 Hours)"
-              onChange={handleInputChange}
-              value={formData.duration}
-              className="border p-2 rounded"
-            />
-
-            <input
-              name="introVideo"
-              placeholder="Intro Video URL"
-              onChange={handleInputChange}
-              value={formData.introVideo}
-              className="col-span-2 border p-2 rounded"
-            />
-            <textarea
-              name="description"
-              placeholder="Description"
-              onChange={handleInputChange}
-              value={formData.description}
-              className="col-span-2 border p-2 rounded"
-            />
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="col-span-2 border p-2 rounded"
-            />
-
-            <div className="col-span-2 flex justify-end gap-3 mt-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-sm font-black uppercase">
+                {editingCourse ? "Edit Course" : "Create New Course"}
+              </h2>
+              <button onClick={closeModal}>
+                <HiOutlineX />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                required
+                name="title"
+                placeholder="Course Title"
+                onChange={handleInputChange}
+                value={formData.title}
+                className="col-span-2 p-2.5 border rounded-xl text-xs"
+              />
+              <select
+                required
+                name="categoryId"
+                onChange={handleInputChange}
+                value={formData.categoryId}
+                className="p-2.5 border rounded-xl text-xs"
+              >
+                <option value="">Select Category</option>
+                {activeCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.title}
+                  </option>
+                ))}
+              </select>
+              <select
+                required
+                name="level"
+                onChange={handleInputChange}
+                value={formData.level}
+                className="p-2.5 border rounded-xl text-xs"
+              >
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+              <input
+                required
+                name="price"
+                type="number"
+                placeholder="Price"
+                onChange={handleInputChange}
+                value={formData.price}
+                className="p-2.5 border rounded-xl text-xs"
+              />
+              <input
+                required
+                name="discountPrice"
+                type="number"
+                placeholder="Discount"
+                onChange={handleInputChange}
+                value={formData.discountPrice}
+                className="p-2.5 border rounded-xl text-xs"
+              />
+              <input
+                required
+                name="duration"
+                placeholder="Duration (e.g. 10 Hours)"
+                onChange={handleInputChange}
+                value={formData.duration}
+                className="p-2.5 border rounded-xl text-xs"
+              />
+              <input
+                required
+                name="introVideo"
+                placeholder="Intro Video URL"
+                onChange={handleInputChange}
+                value={formData.introVideo}
+                className="p-2.5 border rounded-xl text-xs"
+              />
+              <textarea
+                required
+                name="description"
+                placeholder="Description"
+                onChange={handleInputChange}
+                value={formData.description}
+                className="col-span-2 p-2.5 border rounded-xl text-xs h-20"
+              />
+              <div className="col-span-2">
+                <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  Thumbnail
+                </label>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="w-full text-xs border p-2 rounded-xl"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
               <button
                 type="button"
                 onClick={closeModal}
-                className="px-6 py-2 border rounded"
+                className="px-4 py-2 border rounded-xl text-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-indigo-600 text-white rounded"
+                className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
               >
-                Save
+                Commit Changes
               </button>
             </div>
           </form>

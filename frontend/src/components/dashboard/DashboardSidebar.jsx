@@ -89,11 +89,11 @@ const DashboardSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       path: "/dashboard/teacher/lessons",
       icon: HiOutlineAcademicCap,
     },
-    {
-      name: "Students",
-      path: "/dashboard/teacher/students",
-      icon: HiOutlineUsers,
-    },
+    // {
+    //   name: "Students",
+    //   path: "/dashboard/teacher/students",
+    //   icon: HiOutlineUsers,
+    // },
     {
       name: "Profile",
       path: "/dashboard/teacher/profile",

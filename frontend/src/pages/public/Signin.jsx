@@ -75,9 +75,8 @@ const Signin = () => {
       toast.success(resultAction.payload?.message || "Login successful!");
 
       // Delay redirect slightly so the success toast is readable
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+
+      navigate("/");
     } else {
       // Safely access rejectWithValue payload object structure
       const errorMessage =
